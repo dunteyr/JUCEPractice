@@ -26,14 +26,17 @@ public:
     void sliderValueChanged(juce::Slider* slider) override;
 
 private:
+    juce::Path makePlayButtonShape();
     //==============================================================================
     // Your private member variables go here...
-    float noiseVolume;
+    float noiseVolume = 0.0;
 
     juce::Random random;
 
     juce::Slider volSlider;
     juce::Label volLabel;
+
+    juce::ShapeButton noisePlayButton;
 
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
