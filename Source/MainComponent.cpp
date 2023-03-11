@@ -1,10 +1,10 @@
 #include "MainComponent.h"
 
 //==============================================================================
-MainComponent::MainComponent() : noisePlayButton("NoisePlayButton", juce::Colour::Colour(60, 179, 113), juce::Colour::Colour(120, 179, 113), juce::Colour::Colour(180, 179, 113))
+MainComponent::MainComponent() : noisePlayButton("NoisePlayButton", juce::Colour::Colour(60, 179, 113), juce::Colour::Colour(40, 159, 93), juce::Colour::Colour(20, 139, 73))
 {
     noisePlayButton.setShape(makePlayButtonShape(), true, true, false);
-    noisePlayButton.setBorderSize(juce::BorderSize<int>(2));
+    //noisePlayButton.setBorderSize(juce::BorderSize<int>(2));
 
     addAndMakeVisible(noisePlayButton);
     addAndMakeVisible(volLabel);
@@ -13,7 +13,7 @@ MainComponent::MainComponent() : noisePlayButton("NoisePlayButton", juce::Colour
     volSlider.addListener(this);
     volLabel.setText("Volume", juce::dontSendNotification);
     volLabel.setJustificationType(juce::Justification::horizontallyCentred);
-    volLabel.attachToComponent(&volSlider, true);
+    //volLabel.attachToComponent(&volSlider, true);
     
     
 
@@ -100,7 +100,7 @@ void MainComponent::resized()
     // This is called when the MainContentComponent is resized.
     // If you add any child components, this is where you should
     // update their positions.
-    noisePlayButton.setBounds(0, 0, this->getWidth() / 8, this->getHeight() / 10);
+    noisePlayButton.setBounds(0, 0, this->getWidth() / 10, this->getHeight() / 10);
 
     //place volume label after the play button
     int volLabelX = noisePlayButton.getBounds().getBottomRight().getX();
@@ -126,11 +126,10 @@ void MainComponent::sliderValueChanged(juce::Slider* slider)
 juce::Path MainComponent::makePlayButtonShape() 
 {
     juce::Path shape;
-    juce::Line<float> line;
-    line.setStart(0.0, 0.0);
-    line.setEnd(10.0, 0.0);
 
-    shape.addArrow(line, 1, 3, 4);
+    shape.addTriangle(0.0, 0.0, 0.0, 4.0, 3.0, 2.0);
 
-    return shape;
+    juce::Path roundedShape = shape.createPathWithRoundedCorners(0.5);
+
+    return roundedShape;
 }
