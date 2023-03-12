@@ -3,8 +3,10 @@
 //==============================================================================
 MainComponent::MainComponent() : noisePlayButton("NoisePlayButton", juce::Colour::Colour(60, 179, 113), juce::Colour::Colour(40, 159, 93), juce::Colour::Colour(20, 139, 73))
 {
+    noiseIsPlaying = false;
+
     noisePlayButton.setShape(makePlayButtonShape(), true, true, false);
-    //noisePlayButton.setBorderSize(juce::BorderSize<int>(2));
+    noisePlayButton.onClick = [this] { onNoisePlayStop(); };
 
     addAndMakeVisible(noisePlayButton);
     addAndMakeVisible(volLabel);
@@ -65,17 +67,21 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
     // (to prevent the output of random noise)
     //bufferToFill.clearActiveBufferRegion();
 
-    //for each channel in the buffer, get a pointer to the starting sample (so that it can be written to)
-    for (auto channel = 0; channel < bufferToFill.buffer->getNumChannels(); channel++) {
-        auto* buffer = bufferToFill.buffer->getWritePointer(channel, bufferToFill.startSample);
+    if (noiseIsPlaying)
+    {
+        //for each channel in the buffer, get a pointer to the starting sample (so that it can be written to)
+        for (auto channel = 0; channel < bufferToFill.buffer->getNumChannels(); channel++) {
+            auto* buffer = bufferToFill.buffer->getWritePointer(channel, bufferToFill.startSample);
 
-        //for each sample in the channel's buffer, set it to a random value between -0.125 and 0.125 to create a buffer of random noise
-        for (auto sample = 0; sample < bufferToFill.numSamples; sample++) {
-            float randomValue = random.nextFloat() * 2.0 - 1.0;
-            
-            buffer[sample] = randomValue * noiseVolume;
+            //for each sample in the channel's buffer, set it to a random value between -0.125 and 0.125 to create a buffer of random noise
+            for (auto sample = 0; sample < bufferToFill.numSamples; sample++) {
+                float randomValue = random.nextFloat() * 2.0 - 1.0;
+
+                buffer[sample] = randomValue * noiseVolume;
+            }
         }
     }
+    
 }
 
 void MainComponent::releaseResources()
@@ -132,4 +138,32 @@ juce::Path MainComponent::makePlayButtonShape()
     juce::Path roundedShape = shape.createPathWithRoundedCorners(0.5);
 
     return roundedShape;
+}
+
+
+juce::Path MainComponent::makeStopButtonShape()
+{
+    juce::Path shape;
+
+    shape.addRectangle(0.0, 0.0, 4.0, 4.0);
+
+    juce::Path roundedShape = shape.createPathWithRoundedCorners(0.5);
+
+    return roundedShape;
+}
+
+
+void MainComponent::onNoisePlayStop()
+{
+    if (noiseIsPlaying)
+    {
+        noiseIsPlaying = false;
+        noisePlayButton.setShape(makePlayButtonShape(), false, true, false);
+    }
+
+    else
+    {
+        noiseIsPlaying = true;
+        noisePlayButton.setShape(makeStopButtonShape(), false, true, false);
+    }
 }

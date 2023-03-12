@@ -27,8 +27,12 @@ public:
 
 private:
     juce::Path makePlayButtonShape();
+    juce::Path makeStopButtonShape();
+    void onNoisePlayStop();
     //==============================================================================
     // Your private member variables go here...
+    bool noiseIsPlaying;
+
     float noiseVolume = 0.0;
 
     juce::Random random;
