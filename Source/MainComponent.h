@@ -14,6 +14,14 @@ public:
     MainComponent();
     ~MainComponent() override;
 
+    struct ColorPalette 
+    {
+        juce::Colour normalColour = juce::Colour::Colour(60, 179, 113);
+        juce::Colour overColour = juce::Colour::Colour(40, 159, 93);
+        juce::Colour downColour = juce::Colour::Colour(20, 139, 73);
+
+    }colorPalette;
+
     //==============================================================================
     void prepareToPlay (int samplesPerBlockExpected, double sampleRate) override;
     void getNextAudioBlock (const juce::AudioSourceChannelInfo& bufferToFill) override;

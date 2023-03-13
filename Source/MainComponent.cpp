@@ -1,7 +1,7 @@
 #include "MainComponent.h"
 
 //==============================================================================
-MainComponent::MainComponent() : noisePlayButton("NoisePlayButton", juce::Colour::Colour(60, 179, 113), juce::Colour::Colour(40, 159, 93), juce::Colour::Colour(20, 139, 73))
+MainComponent::MainComponent() : noisePlayButton("NoisePlayButton", MainComponent::colorPalette.normalColour, MainComponent::colorPalette.overColour, MainComponent::colorPalette.downColour)
 {
     noiseIsPlaying = false;
 
