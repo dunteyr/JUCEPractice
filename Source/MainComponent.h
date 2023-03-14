@@ -22,11 +22,6 @@ public:
 
     }colorPalette;
 
-    struct SinParams 
-    {
-        double currentSampleRate = 0.0, currentAngle = 0.0, angleDelta = 0.0;
-    }sinParams;
-
     //==============================================================================
     void prepareToPlay (int samplesPerBlockExpected, double sampleRate) override;
     void getNextAudioBlock (const juce::AudioSourceChannelInfo& bufferToFill) override;
@@ -39,12 +34,22 @@ public:
     void sliderValueChanged(juce::Slider* slider) override;
 
 private:
+
+    struct SinParams
+    {
+        double currentSampleRate = 0.0, currentAngle = 0.0, angleDelta = 0.0;
+    }sinParams;
+
     juce::Path makePlayButtonShape();
     juce::Path makeStopButtonShape();
     void onNoisePlayStop();
+    void onSinPlayStop();
+
+    void updateAngleDelta();
     //==============================================================================
     // Your private member variables go here...
     bool noiseIsPlaying;
+    bool sinIsPlaying;
 
     float noiseVolume = 0.0;
 

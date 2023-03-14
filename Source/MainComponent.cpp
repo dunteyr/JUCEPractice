@@ -6,11 +6,13 @@ MainComponent::MainComponent() :
     sinPlayButton("SinPlayButton", MainComponent::colorPalette.normalColour, MainComponent::colorPalette.overColour, MainComponent::colorPalette.downColour)
 {
     noiseIsPlaying = false;
+    sinIsPlaying = false;
 
     noisePlayButton.setShape(makePlayButtonShape(), true, true, false);
     noisePlayButton.onClick = [this] { onNoisePlayStop(); };
 
     sinPlayButton.setShape(makePlayButtonShape(), true, true, false);
+    sinPlayButton.onClick = [this] { onSinPlayStop(); };
 
     addAndMakeVisible(noisePlayButton);
     addAndMakeVisible(sinPlayButton);
@@ -22,17 +24,22 @@ MainComponent::MainComponent() :
     addAndMakeVisible(noiseVolSlider);
     noiseVolSlider.setRange(0.0, 1.0, 0.01);
     noiseVolSlider.addListener(this);
+    noiseVolSlider.setColour(juce::Slider::thumbColourId, colorPalette.normalColour);
 
     addAndMakeVisible(sinVolSlider);
     sinVolSlider.setRange(0.0, 1.0, 0.01);
+    sinVolSlider.setColour(juce::Slider::thumbColourId, colorPalette.normalColour);
     addAndMakeVisible(sinVolLabel);
     sinVolLabel.setText("Volume", juce::dontSendNotification);
     sinVolLabel.setJustificationType(juce::Justification::horizontallyCentred);
 
     addAndMakeVisible(sinFreqSlider);
     sinFreqSlider.setRange(50, 10000);
+    sinFreqSlider.setValue(440);
     sinFreqSlider.setSkewFactorFromMidPoint(1000.0);
     sinFreqSlider.setNumDecimalPlacesToDisplay(1);
+    sinFreqSlider.setColour(juce::Slider::thumbColourId, colorPalette.normalColour);
+    sinFreqSlider.onValueChange = [this] { if (sinParams.currentSampleRate > 0.0) updateAngleDelta(); }; //update sine angle delta whenever freq is changed
     addAndMakeVisible(sinFreqLabel);
     sinFreqLabel.setText("Frequency", juce::dontSendNotification);
     sinFreqLabel.setJustificationType(juce::Justification::horizontallyCentred);
@@ -82,6 +89,7 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
 
     //sample rate is needed for sine generator
     sinParams.currentSampleRate = sampleRate;
+    updateAngleDelta();
 }
 
 void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& bufferToFill)
@@ -100,13 +108,23 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
         for (auto channel = 0; channel < bufferToFill.buffer->getNumChannels(); channel++) {
             auto* buffer = bufferToFill.buffer->getWritePointer(channel, bufferToFill.startSample);
 
-            //for each sample in the channel's buffer, set it to a random value between -0.125 and 0.125 to create a buffer of random noise
+            //for each sample in the channel's buffer, set it to a random value between -1 and 1 to create a buffer of random noise
             for (auto sample = 0; sample < bufferToFill.numSamples; sample++) {
                 float randomValue = random.nextFloat() * 2.0 - 1.0;
 
                 buffer[sample] = randomValue * noiseVolume;
             }
         }
+    }
+
+    if (sinIsPlaying)
+    {
+
+    }
+
+    if (noiseIsPlaying && sinIsPlaying)
+    {
+
     }
     
 }
@@ -176,6 +194,13 @@ void MainComponent::sliderValueChanged(juce::Slider* slider)
 }
 
 
+void MainComponent::updateAngleDelta()
+{
+    auto cyclesPerSample = sinFreqSlider.getValue() / sinParams.currentSampleRate;         
+    sinParams.angleDelta = cyclesPerSample * 2.0 * juce::MathConstants<double>::pi;
+}
+
+
 juce::Path MainComponent::makePlayButtonShape() 
 {
     juce::Path shape;
@@ -212,5 +237,21 @@ void MainComponent::onNoisePlayStop()
     {
         noiseIsPlaying = true;
         noisePlayButton.setShape(makeStopButtonShape(), false, true, false);
+    }
+}
+
+
+void MainComponent::onSinPlayStop()
+{
+    if (sinIsPlaying)
+    {
+        sinIsPlaying = false;
+        sinPlayButton.setShape(makePlayButtonShape(), false, true, false);
+    }
+
+    else
+    {
+        sinIsPlaying = true;
+        sinPlayButton.setShape(makeStopButtonShape(), false, true, false);
     }
 }
