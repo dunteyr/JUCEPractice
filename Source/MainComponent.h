@@ -22,6 +22,11 @@ public:
 
     }colorPalette;
 
+    struct SinParams 
+    {
+        double currentSampleRate = 0.0, currentAngle = 0.0, angleDelta = 0.0;
+    }sinParams;
+
     //==============================================================================
     void prepareToPlay (int samplesPerBlockExpected, double sampleRate) override;
     void getNextAudioBlock (const juce::AudioSourceChannelInfo& bufferToFill) override;
@@ -45,10 +50,17 @@ private:
 
     juce::Random random;
 
-    juce::Slider volSlider;
-    juce::Label volLabel;
+    juce::Slider noiseVolSlider;
+    juce::Label noiseVolLabel;
+
+    juce::Slider sinVolSlider;
+    juce::Label sinVolLabel;
+
+    juce::Slider sinFreqSlider;
+    juce::Label sinFreqLabel;
 
     juce::ShapeButton noisePlayButton;
+    juce::ShapeButton sinPlayButton;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };

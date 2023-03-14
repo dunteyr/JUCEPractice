@@ -1,21 +1,44 @@
 #include "MainComponent.h"
 
 //==============================================================================
-MainComponent::MainComponent() : noisePlayButton("NoisePlayButton", MainComponent::colorPalette.normalColour, MainComponent::colorPalette.overColour, MainComponent::colorPalette.downColour)
+MainComponent::MainComponent() : 
+    noisePlayButton("NoisePlayButton", MainComponent::colorPalette.normalColour, MainComponent::colorPalette.overColour, MainComponent::colorPalette.downColour),
+    sinPlayButton("SinPlayButton", MainComponent::colorPalette.normalColour, MainComponent::colorPalette.overColour, MainComponent::colorPalette.downColour)
 {
     noiseIsPlaying = false;
 
     noisePlayButton.setShape(makePlayButtonShape(), true, true, false);
     noisePlayButton.onClick = [this] { onNoisePlayStop(); };
 
+    sinPlayButton.setShape(makePlayButtonShape(), true, true, false);
+
     addAndMakeVisible(noisePlayButton);
-    addAndMakeVisible(volLabel);
-    addAndMakeVisible(volSlider);
-    volSlider.setRange(0.0, 1.0, 0.01);
-    volSlider.addListener(this);
-    volLabel.setText("Volume", juce::dontSendNotification);
-    volLabel.setJustificationType(juce::Justification::horizontallyCentred);
-    //volLabel.attachToComponent(&volSlider, true);
+    addAndMakeVisible(sinPlayButton);
+
+    addAndMakeVisible(noiseVolLabel);
+    noiseVolLabel.setText("Volume", juce::dontSendNotification);
+    noiseVolLabel.setJustificationType(juce::Justification::horizontallyCentred);
+
+    addAndMakeVisible(noiseVolSlider);
+    noiseVolSlider.setRange(0.0, 1.0, 0.01);
+    noiseVolSlider.addListener(this);
+
+    addAndMakeVisible(sinVolSlider);
+    sinVolSlider.setRange(0.0, 1.0, 0.01);
+    addAndMakeVisible(sinVolLabel);
+    sinVolLabel.setText("Volume", juce::dontSendNotification);
+    sinVolLabel.setJustificationType(juce::Justification::horizontallyCentred);
+
+    addAndMakeVisible(sinFreqSlider);
+    sinFreqSlider.setRange(50, 10000, 1.0);
+    sinFreqSlider.setSkewFactorFromMidPoint(500.0);
+    addAndMakeVisible(sinFreqLabel);
+    sinFreqLabel.setText("Frequency", juce::dontSendNotification);
+    sinFreqLabel.setJustificationType(juce::Justification::horizontallyCentred);
+
+    
+
+    
     
     
 
@@ -40,7 +63,7 @@ MainComponent::MainComponent() : noisePlayButton("NoisePlayButton", MainComponen
 MainComponent::~MainComponent()
 {
     //apparently this line isn't needed
-    volSlider.removeListener(this);
+    noiseVolSlider.removeListener(this);
     // This shuts down the audio device and clears the audio source.
     shutdownAudio();
 }
@@ -55,6 +78,9 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
     // but be careful - it will be called on the audio thread, not the GUI thread.
 
     // For more details, see the help for AudioProcessor::prepareToPlay()
+
+    //sample rate is needed for sine generator
+    sinParams.currentSampleRate = sampleRate;
 }
 
 void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& bufferToFill)
@@ -103,19 +129,33 @@ void MainComponent::paint (juce::Graphics& g)
 
 void MainComponent::resized()
 {
+    //number of pixels to be used for space between stuff
+    int padding = 20;
+    int labelWidth = this->getWidth() / 12;
+    //the height of an entire row (button, label, slider)
+    int rowHeight = this->getHeight() / 10;
+
     // This is called when the MainContentComponent is resized.
     // If you add any child components, this is where you should
     // update their positions.
-    noisePlayButton.setBounds(0, 0, this->getWidth() / 10, this->getHeight() / 10);
+    noisePlayButton.setBounds(0, padding, this->getWidth() / 10, rowHeight);
 
     //place volume label after the play button
     int volLabelX = noisePlayButton.getBounds().getBottomRight().getX();
-    volLabel.setBounds(volLabelX, 0, this->getWidth() / 12, this->getHeight() / 10);
+    noiseVolLabel.setBounds(volLabelX, padding, this->getWidth() / 12, rowHeight);
 
     //place slider after label. Take up remaining screen width
-    int volSliderWidth = this->getWidth() - volLabel.getBounds().getWidth() - noisePlayButton.getBounds().getWidth();
-    int volSliderX = volLabel.getBounds().getBottomRight().getX();
-    volSlider.setBounds(volSliderX, 0, volSliderWidth, this->getHeight() / 10);
+    int volSliderWidth = this->getWidth() - noiseVolLabel.getBounds().getWidth() - noisePlayButton.getBounds().getWidth();
+    int volSliderX = noiseVolLabel.getBounds().getBottomRight().getX();
+    noiseVolSlider.setBounds(volSliderX, padding, volSliderWidth, rowHeight);
+
+
+    int sinVolRowYPos = this->getHeight() / 4 + padding;
+    sinPlayButton.setBounds(0, sinVolRowYPos, this->getWidth() / 10, this->getHeight() / 10);
+
+    sinVolLabel.setBounds(volLabelX, sinVolRowYPos, labelWidth, rowHeight);
+
+    sinVolSlider.setBounds(volSliderX, sinVolRowYPos, volSliderWidth, rowHeight);
     
 
 }
@@ -123,8 +163,8 @@ void MainComponent::resized()
 
 void MainComponent::sliderValueChanged(juce::Slider* slider)
 {
-    if (slider == &volSlider) {
-        noiseVolume = volSlider.getValue();
+    if (slider == &noiseVolSlider) {
+        noiseVolume = noiseVolSlider.getValue();
     }
 }
 
