@@ -30,8 +30,9 @@ MainComponent::MainComponent() :
     sinVolLabel.setJustificationType(juce::Justification::horizontallyCentred);
 
     addAndMakeVisible(sinFreqSlider);
-    sinFreqSlider.setRange(50, 10000, 1.0);
-    sinFreqSlider.setSkewFactorFromMidPoint(500.0);
+    sinFreqSlider.setRange(50, 10000);
+    sinFreqSlider.setSkewFactorFromMidPoint(1000.0);
+    sinFreqSlider.setNumDecimalPlacesToDisplay(1);
     addAndMakeVisible(sinFreqLabel);
     sinFreqLabel.setText("Frequency", juce::dontSendNotification);
     sinFreqLabel.setJustificationType(juce::Justification::horizontallyCentred);
@@ -129,15 +130,17 @@ void MainComponent::paint (juce::Graphics& g)
 
 void MainComponent::resized()
 {
+    // This is called when the MainContentComponent is resized.
+    // If you add any child components, this is where you should
+    // update their positions.
+
     //number of pixels to be used for space between stuff
     int padding = 20;
     int labelWidth = this->getWidth() / 12;
     //the height of an entire row (button, label, slider)
     int rowHeight = this->getHeight() / 10;
 
-    // This is called when the MainContentComponent is resized.
-    // If you add any child components, this is where you should
-    // update their positions.
+    //////////////NOISE VOLUME SLIDER ROW////////////////////////////////////////////
     noisePlayButton.setBounds(0, padding, this->getWidth() / 10, rowHeight);
 
     //place volume label after the play button
@@ -149,15 +152,19 @@ void MainComponent::resized()
     int volSliderX = noiseVolLabel.getBounds().getBottomRight().getX();
     noiseVolSlider.setBounds(volSliderX, padding, volSliderWidth, rowHeight);
 
-
-    int sinVolRowYPos = this->getHeight() / 4 + padding;
+    /////////////SINE VOLUME SLIDER ROW//////////////////////////////////////////////
+    int sinVolRowYPos = this->getHeight() / 4;
     sinPlayButton.setBounds(0, sinVolRowYPos, this->getWidth() / 10, this->getHeight() / 10);
 
     sinVolLabel.setBounds(volLabelX, sinVolRowYPos, labelWidth, rowHeight);
 
     sinVolSlider.setBounds(volSliderX, sinVolRowYPos, volSliderWidth, rowHeight);
-    
 
+    /////////////SINE FREQUENCY SLIDER ROW///////////////////////////////////////////
+    int sinFreqRowYPos = this->getHeight() / 8 * 3;
+    sinFreqLabel.setBounds(volLabelX, sinFreqRowYPos, labelWidth, rowHeight);
+
+    sinFreqSlider.setBounds(volSliderX, sinFreqRowYPos, volSliderWidth, rowHeight);
 }
 
 
