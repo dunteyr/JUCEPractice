@@ -94,47 +94,44 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
 
 void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& bufferToFill)
 {
-    // Your audio-processing code goes here!
-
-    // For more details, see the help for AudioProcessor::getNextAudioBlock()
-
     // Right now we are not producing any data, in which case we need to clear the buffer
     // (to prevent the output of random noise)
     //bufferToFill.clearActiveBufferRegion();
 
     if (noiseIsPlaying && !sinIsPlaying)
     {
-        //for each channel in the buffer, get a pointer to the starting sample (so that it can be written to)
-        for (auto channel = 0; channel < bufferToFill.buffer->getNumChannels(); channel++) 
-        {
-            auto* buffer = bufferToFill.buffer->getWritePointer(channel, bufferToFill.startSample);
+        ////for each channel in the buffer, get a pointer to the starting sample (so that it can be written to)
+        //for (auto channel = 0; channel < bufferToFill.buffer->getNumChannels(); channel++) 
+        //{
+        //    auto* buffer = bufferToFill.buffer->getWritePointer(channel, bufferToFill.startSample);
 
-            //for each sample in the channel's buffer, set it to a random value between -1 and 1 to create a buffer of random noise
-            for (auto sample = 0; sample < bufferToFill.numSamples; sample++) {
-                float randomValue = random.nextFloat() * 2.0 - 1.0;
+        //    //for each sample in the channel's buffer, set it to a random value between -1 and 1 to create a buffer of random noise
+        //    for (auto sample = 0; sample < bufferToFill.numSamples; sample++) {
+        //        float randomValue = random.nextFloat() * 2.0 - 1.0;
 
-                buffer[sample] = randomValue * noiseVolume;
-            }
-        }
+        //        buffer[sample] = randomValue * noiseVolume;
+        //    }
+        //}
+
+        bufferToFill.buffer->makeCopyOf(noiseGen(*bufferToFill.buffer));
     }
 
     else if (sinIsPlaying && !noiseIsPlaying)
     {
-        //channels have to be filled at the same time with the same value or you get something cooler than a sin wave
-        auto* leftBuffer = bufferToFill.buffer->getWritePointer(0, bufferToFill.startSample);
-        auto* rightBuffer = bufferToFill.buffer->getWritePointer(1, bufferToFill.startSample);
+        ////channels have to be filled at the same time with the same value or you get something cooler than a sin wave
+        //auto* leftBuffer = bufferToFill.buffer->getWritePointer(0, bufferToFill.startSample);
+        //auto* rightBuffer = bufferToFill.buffer->getWritePointer(1, bufferToFill.startSample);
 
-        for (auto sample = 0; sample < bufferToFill.numSamples; sample++)
-        {
-            auto currentSample = (float)std::sin(sinParams.currentAngle);
-            sinParams.currentAngle += sinParams.angleDelta;
+        //for (auto sample = 0; sample < bufferToFill.numSamples; sample++)
+        //{
+        //    auto currentSample = (float)std::sin(sinParams.currentAngle);
+        //    sinParams.currentAngle += sinParams.angleDelta;
 
-            leftBuffer[sample] = currentSample * sinVolume;
-            rightBuffer[sample] = currentSample * sinVolume;
-        }
-            
+        //    leftBuffer[sample] = currentSample * sinVolume;
+        //    rightBuffer[sample] = currentSample * sinVolume;
+        //}
 
-            
+        bufferToFill.buffer->makeCopyOf(sinGen(*bufferToFill.buffer));
 
     }
 
@@ -262,4 +259,47 @@ void MainComponent::onSinPlayStop()
         sinIsPlaying = true;
         sinPlayButton.setShape(makeStopButtonShape(), false, true, false);
     }
+}
+
+
+juce::AudioBuffer<float> MainComponent::sinGen(const juce::AudioBuffer<float>& mainBuffer)
+{
+    //make copy of main buffer
+    juce::AudioBuffer<float> sinBuffer(mainBuffer);
+
+    //channels have to be filled at the same time with the same value or you get something cooler than a sin wave
+    auto* leftBuffer = sinBuffer.getWritePointer(0, 0);
+    auto* rightBuffer = sinBuffer.getWritePointer(1, 0);
+
+    for (auto sample = 0; sample < sinBuffer.getNumSamples(); sample++)
+    {
+        auto currentSample = (float)std::sin(sinParams.currentAngle);
+        sinParams.currentAngle += sinParams.angleDelta;
+
+        leftBuffer[sample] = currentSample * sinVolume;
+        rightBuffer[sample] = currentSample * sinVolume;
+    }
+
+    return sinBuffer;
+}
+
+
+juce::AudioBuffer<float> MainComponent::noiseGen(const juce::AudioBuffer<float>& mainBuffer)
+{
+    juce::AudioBuffer<float> noiseBuffer(mainBuffer);
+
+    //for each channel in the buffer, get a pointer to the starting sample (so that it can be written to)
+    for (auto channel = 0; channel < noiseBuffer.getNumChannels(); channel++)
+    {
+        auto* buffer = noiseBuffer.getWritePointer(channel, 0);
+
+        //for each sample in the channel's buffer, set it to a random value between -1 and 1 to create a buffer of random noise
+        for (auto sample = 0; sample < noiseBuffer.getNumSamples(); sample++) {
+            float randomValue = random.nextFloat() * 2.0 - 1.0;
+
+            buffer[sample] = randomValue * noiseVolume;
+        }
+    }
+
+    return noiseBuffer;
 }

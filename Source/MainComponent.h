@@ -1,6 +1,7 @@
 #pragma once
 
 #include <JuceHeader.h>
+using std::vector;
 
 //==============================================================================
 /*
@@ -44,6 +45,8 @@ private:
     void onSinPlayStop();
 
     void updateAngleDelta();
+    juce::AudioBuffer<float> sinGen(const juce::AudioBuffer<float>& mainBuffer);
+    juce::AudioBuffer<float> noiseGen(const juce::AudioBuffer<float>& mainBuffer);
     //==============================================================================
     // Your private member variables go here...
     bool noiseIsPlaying;
