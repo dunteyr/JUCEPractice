@@ -23,12 +23,13 @@ MainComponent::MainComponent() :
 
     addAndMakeVisible(noiseVolSlider);
     noiseVolSlider.setRange(0.0, 1.0, 0.01);
-    noiseVolSlider.addListener(this);
     noiseVolSlider.setColour(juce::Slider::thumbColourId, colorPalette.normalColour);
+    noiseVolSlider.onValueChange = [this] {noiseVolume = noiseVolSlider.getValue(); };
 
     addAndMakeVisible(sinVolSlider);
     sinVolSlider.setRange(0.0, 1.0, 0.01);
     sinVolSlider.setColour(juce::Slider::thumbColourId, colorPalette.normalColour);
+    sinVolSlider.onValueChange = [this] { sinVolume = sinVolSlider.getValue(); };
     addAndMakeVisible(sinVolLabel);
     sinVolLabel.setText("Volume", juce::dontSendNotification);
     sinVolLabel.setJustificationType(juce::Justification::horizontallyCentred);
@@ -70,8 +71,7 @@ MainComponent::MainComponent() :
 
 MainComponent::~MainComponent()
 {
-    //apparently this line isn't needed
-    noiseVolSlider.removeListener(this);
+    
     // This shuts down the audio device and clears the audio source.
     shutdownAudio();
 }
@@ -102,10 +102,11 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
     // (to prevent the output of random noise)
     //bufferToFill.clearActiveBufferRegion();
 
-    if (noiseIsPlaying)
+    if (noiseIsPlaying && !sinIsPlaying)
     {
         //for each channel in the buffer, get a pointer to the starting sample (so that it can be written to)
-        for (auto channel = 0; channel < bufferToFill.buffer->getNumChannels(); channel++) {
+        for (auto channel = 0; channel < bufferToFill.buffer->getNumChannels(); channel++) 
+        {
             auto* buffer = bufferToFill.buffer->getWritePointer(channel, bufferToFill.startSample);
 
             //for each sample in the channel's buffer, set it to a random value between -1 and 1 to create a buffer of random noise
@@ -117,12 +118,24 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
         }
     }
 
-    if (sinIsPlaying)
+    else if (sinIsPlaying && !noiseIsPlaying)
     {
+        //for each channel in the buffer, get a pointer to the starting sample (so that it can be written to)
+        for (auto channel = 0; channel < bufferToFill.buffer->getNumChannels(); channel++) 
+        {
+            auto* buffer = bufferToFill.buffer->getWritePointer(channel, bufferToFill.startSample);
 
+            for (auto sample = 0; sample < bufferToFill.numSamples; sample++)
+            {
+                auto currentSample = (float)std::sin(sinParams.currentAngle);
+                sinParams.currentAngle += sinParams.angleDelta;
+
+                buffer[sample] = currentSample * sinVolume;
+            }
+        }
     }
 
-    if (noiseIsPlaying && sinIsPlaying)
+    else if (noiseIsPlaying && sinIsPlaying)
     {
 
     }
@@ -183,14 +196,6 @@ void MainComponent::resized()
     sinFreqLabel.setBounds(volLabelX, sinFreqRowYPos, labelWidth, rowHeight);
 
     sinFreqSlider.setBounds(volSliderX, sinFreqRowYPos, volSliderWidth, rowHeight);
-}
-
-
-void MainComponent::sliderValueChanged(juce::Slider* slider)
-{
-    if (slider == &noiseVolSlider) {
-        noiseVolume = noiseVolSlider.getValue();
-    }
 }
 
 

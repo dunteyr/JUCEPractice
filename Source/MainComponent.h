@@ -7,7 +7,7 @@
     This component lives inside our window, and this is where you should put all
     your controls and content.
 */
-class MainComponent  : public juce::AudioAppComponent, public juce::Slider::Listener
+class MainComponent  : public juce::AudioAppComponent
 {
 public:
     //==============================================================================
@@ -31,8 +31,6 @@ public:
     void paint (juce::Graphics& g) override;
     void resized() override;
 
-    void sliderValueChanged(juce::Slider* slider) override;
-
 private:
 
     struct SinParams
@@ -52,6 +50,7 @@ private:
     bool sinIsPlaying;
 
     float noiseVolume = 0.0;
+    float sinVolume = 0.0;
 
     juce::Random random;
 
