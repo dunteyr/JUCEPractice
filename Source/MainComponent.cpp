@@ -120,19 +120,22 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
 
     else if (sinIsPlaying && !noiseIsPlaying)
     {
-        //for each channel in the buffer, get a pointer to the starting sample (so that it can be written to)
-        for (auto channel = 0; channel < bufferToFill.buffer->getNumChannels(); channel++) 
+        //channels have to be filled at the same time with the same value or you get something cooler than a sin wave
+        auto* leftBuffer = bufferToFill.buffer->getWritePointer(0, bufferToFill.startSample);
+        auto* rightBuffer = bufferToFill.buffer->getWritePointer(1, bufferToFill.startSample);
+
+        for (auto sample = 0; sample < bufferToFill.numSamples; sample++)
         {
-            auto* buffer = bufferToFill.buffer->getWritePointer(channel, bufferToFill.startSample);
+            auto currentSample = (float)std::sin(sinParams.currentAngle);
+            sinParams.currentAngle += sinParams.angleDelta;
 
-            for (auto sample = 0; sample < bufferToFill.numSamples; sample++)
-            {
-                auto currentSample = (float)std::sin(sinParams.currentAngle);
-                sinParams.currentAngle += sinParams.angleDelta;
-
-                buffer[sample] = currentSample * sinVolume;
-            }
+            leftBuffer[sample] = currentSample * sinVolume;
+            rightBuffer[sample] = currentSample * sinVolume;
         }
+            
+
+            
+
     }
 
     else if (noiseIsPlaying && sinIsPlaying)
