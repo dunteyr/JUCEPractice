@@ -137,7 +137,21 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
 
     else if (noiseIsPlaying && sinIsPlaying)
     {
+        juce::AudioBuffer<float> sinBuffer(sinGen(*bufferToFill.buffer));
+        juce::AudioBuffer<float> noiseBuffer(noiseGen(*bufferToFill.buffer));
 
+        auto* leftBuffer = bufferToFill.buffer->getWritePointer(0, bufferToFill.startSample);
+        auto* rightBuffer = bufferToFill.buffer->getWritePointer(1, bufferToFill.startSample);
+
+        for (int sample = 0; sample < bufferToFill.numSamples; sample++)
+        {
+            //fill buffers with the sin sample multiplied by the noise sample for each channel
+            /*leftBuffer[sample] = sinBuffer.getSample(0, sample) * noiseBuffer.getSample(0, sample);
+            rightBuffer[sample] = sinBuffer.getSample(1, sample) * noiseBuffer.getSample(1, sample);*/
+
+            leftBuffer[sample] = sinBuffer.getSample(0, sample);
+            rightBuffer[sample] = sinBuffer.getSample(1, sample);
+        }
     }
     
 }
