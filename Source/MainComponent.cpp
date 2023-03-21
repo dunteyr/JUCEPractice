@@ -282,16 +282,16 @@ juce::AudioBuffer<float> MainComponent::sinGen(const juce::AudioBuffer<float>& m
     juce::AudioBuffer<float> sinBuffer(mainBuffer);
 
     //channels have to be filled at the same time with the same value or you get something cooler than a sin wave
-    auto* leftBuffer = sinBuffer.getWritePointer(0, 0);
-    auto* rightBuffer = sinBuffer.getWritePointer(1, 0);
+    auto* leftSinBuffer = sinBuffer.getWritePointer(0, 0);
+    auto* rightSinBuffer = sinBuffer.getWritePointer(1, 0);
 
     for (auto sample = 0; sample < sinBuffer.getNumSamples(); sample++)
     {
         auto currentSample = (float)std::sin(sinParams.currentAngle);
         sinParams.currentAngle += sinParams.angleDelta;
 
-        leftBuffer[sample] = currentSample * sinVolume;
-        rightBuffer[sample] = currentSample * sinVolume;
+        leftSinBuffer[sample] = currentSample * sinVolume;
+        rightSinBuffer[sample] = currentSample * sinVolume;
     }
 
     return sinBuffer;
