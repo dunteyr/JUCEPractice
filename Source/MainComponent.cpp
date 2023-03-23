@@ -146,11 +146,11 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
         for (int sample = 0; sample < bufferToFill.numSamples; sample++)
         {
             //fill buffers with the sin sample multiplied by the noise sample for each channel
-            /*leftBuffer[sample] = sinBuffer.getSample(0, sample) * noiseBuffer.getSample(0, sample);
-            rightBuffer[sample] = sinBuffer.getSample(1, sample) * noiseBuffer.getSample(1, sample);*/
+            leftBuffer[sample] = sinBuffer.getSample(0, sample) + noiseBuffer.getSample(0, sample);
+            rightBuffer[sample] = sinBuffer.getSample(1, sample) + noiseBuffer.getSample(1, sample);
 
-            leftBuffer[sample] = sinBuffer.getSample(0, sample);
-            rightBuffer[sample] = sinBuffer.getSample(1, sample);
+            /*leftBuffer[sample] = sinBuffer.getSample(0, sample);
+            rightBuffer[sample] = sinBuffer.getSample(1, sample);*/
         }
     }
     
@@ -279,7 +279,8 @@ void MainComponent::onSinPlayStop()
 juce::AudioBuffer<float> MainComponent::sinGen(const juce::AudioBuffer<float>& mainBuffer)
 {
     //make copy of main buffer
-    juce::AudioBuffer<float> sinBuffer(mainBuffer);
+    juce::AudioBuffer<float> sinBuffer;
+    sinBuffer.makeCopyOf(mainBuffer);
 
     //channels have to be filled at the same time with the same value or you get something cooler than a sin wave
     auto* leftSinBuffer = sinBuffer.getWritePointer(0, 0);
@@ -300,7 +301,8 @@ juce::AudioBuffer<float> MainComponent::sinGen(const juce::AudioBuffer<float>& m
 
 juce::AudioBuffer<float> MainComponent::noiseGen(const juce::AudioBuffer<float>& mainBuffer)
 {
-    juce::AudioBuffer<float> noiseBuffer(mainBuffer);
+    juce::AudioBuffer<float> noiseBuffer;
+    noiseBuffer.makeCopyOf(mainBuffer);
 
     //for each channel in the buffer, get a pointer to the starting sample (so that it can be written to)
     for (auto channel = 0; channel < noiseBuffer.getNumChannels(); channel++)
