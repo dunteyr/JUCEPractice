@@ -167,8 +167,13 @@ void MainComponent::releaseResources()
 //==============================================================================
 void MainComponent::paint (juce::Graphics& g)
 {
+    auto componentArea = getLocalBounds();
+
+    g.setColour(colorPalette.normalColour);
+    g.fillRect(componentArea.removeFromTop(headerSize));
+
     // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
+    //g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
 
     // You can add your drawing code here!
 }
@@ -186,30 +191,30 @@ void MainComponent::resized()
     int rowHeight = this->getHeight() / 10;
 
     //////////////NOISE VOLUME SLIDER ROW////////////////////////////////////////////
-    noisePlayButton.setBounds(0, padding, this->getWidth() / 10, rowHeight);
+    noisePlayButton.setBounds(0, padding + headerSize, this->getWidth() / 10, rowHeight);
 
     //place volume label after the play button
     int volLabelX = noisePlayButton.getBounds().getBottomRight().getX();
-    noiseVolLabel.setBounds(volLabelX, padding, this->getWidth() / 12, rowHeight);
+    noiseVolLabel.setBounds(volLabelX, padding + headerSize, this->getWidth() / 12, rowHeight);
 
     //place slider after label. Take up remaining screen width
     int volSliderWidth = this->getWidth() - noiseVolLabel.getBounds().getWidth() - noisePlayButton.getBounds().getWidth();
     int volSliderX = noiseVolLabel.getBounds().getBottomRight().getX();
-    noiseVolSlider.setBounds(volSliderX, padding, volSliderWidth, rowHeight);
+    noiseVolSlider.setBounds(volSliderX, padding + headerSize, volSliderWidth, rowHeight);
 
     /////////////SINE VOLUME SLIDER ROW//////////////////////////////////////////////
     int sinVolRowYPos = this->getHeight() / 4;
-    sinPlayButton.setBounds(0, sinVolRowYPos, this->getWidth() / 10, this->getHeight() / 10);
+    sinPlayButton.setBounds(0, sinVolRowYPos + headerSize, this->getWidth() / 10, this->getHeight() / 10);
 
-    sinVolLabel.setBounds(volLabelX, sinVolRowYPos, labelWidth, rowHeight);
+    sinVolLabel.setBounds(volLabelX, sinVolRowYPos + headerSize, labelWidth, rowHeight);
 
-    sinVolSlider.setBounds(volSliderX, sinVolRowYPos, volSliderWidth, rowHeight);
+    sinVolSlider.setBounds(volSliderX, sinVolRowYPos + headerSize, volSliderWidth, rowHeight);
 
     /////////////SINE FREQUENCY SLIDER ROW///////////////////////////////////////////
     int sinFreqRowYPos = this->getHeight() / 8 * 3;
-    sinFreqLabel.setBounds(volLabelX, sinFreqRowYPos, labelWidth, rowHeight);
+    sinFreqLabel.setBounds(volLabelX, sinFreqRowYPos + headerSize, labelWidth, rowHeight);
 
-    sinFreqSlider.setBounds(volSliderX, sinFreqRowYPos, volSliderWidth, rowHeight);
+    sinFreqSlider.setBounds(volSliderX, sinFreqRowYPos + headerSize, volSliderWidth, rowHeight);
 }
 
 

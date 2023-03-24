@@ -39,6 +39,8 @@ private:
         double currentSampleRate = 0.0, currentAngle = 0.0, angleDelta = 0.0;
     }sinParams;
 
+    int headerSize = 48;
+
     juce::Path makePlayButtonShape();
     juce::Path makeStopButtonShape();
     void onNoisePlayStop();
